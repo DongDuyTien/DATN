@@ -1,0 +1,3 @@
+Alder/fire/150/200/7/0
+Roland/water/250/200/4/1
+Gaius/earth/200/200/5/3
