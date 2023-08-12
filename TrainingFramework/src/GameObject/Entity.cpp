@@ -305,6 +305,7 @@ void Entity::TakeDamage(int damage)
 	}
 	else {
 		m_defense -= damage;
+		
 	}
 	ResourceManagers::GetInstance()->PlaySoundWithDuration("hitEnemy.wav", 0.2f);
 }

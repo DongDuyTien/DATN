@@ -125,7 +125,9 @@ void Text::SetText(std::string text) {
 	m_text = text;
 }
 
-
+std::string Text::GetText() {
+	return m_text;
+}
 
 Vector4 Text::EnumToVector(TextColor color)
 {

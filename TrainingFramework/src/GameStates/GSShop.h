@@ -3,6 +3,7 @@
 #include "GameButton.h"
 #include "GameStateMachine.h"
 #include "Shop.h"
+#include "MoneyShop.h"
 
 class GSShop :
 	public GameStateBase
@@ -27,11 +28,13 @@ public:
 private:
 	std::shared_ptr<Sprite2D>				m_background;
 	std::list<std::shared_ptr<GameButton>>	m_listButton;
-	std::list<std::shared_ptr<Text>>		m_listText;
-	std::list< std::shared_ptr<Sprite2D>>	m_listSprite2D;
+	std::vector<std::shared_ptr<Text>>		m_listText;
+	std::vector< std::shared_ptr<Sprite2D>>	m_listSprite2D;
 	int										m_coins;
 	int										m_coinToReset;
 	std::shared_ptr<Text>					m_coinsTxt;
 	std::shared_ptr<Shop>					m_shop;
+	std::shared_ptr<MoneyShop>				m_moneyShop;
+	int										m_page;
 };
 

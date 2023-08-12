@@ -145,7 +145,8 @@ void GameField::Update(float deltaTime) {
 	}
 	case Phase::BASE_PHASE:
 	{
-
+		m_score.clear();
+		m_opponentScore.clear();
 		if (m_currentTurn == ENEMY_TURN)
 		{
 			m_standbyTime += deltaTime;
@@ -184,7 +185,36 @@ void GameField::Update(float deltaTime) {
 			m_gameBoard->ChangePositionOfTwoPiece(lastRow, lastCol, curRow, curCol, deltaTime);
 		}
 		else {
-			auto matchList = m_gameBoard->GetPieceIndexMatchedList();
+			std::set<std::pair<int, int>> matchList1;
+			std::set<std::pair<int, int>> matchList2;
+			std::set<std::pair<int, int>> matchList;
+
+			if (m_gameBoard->GetPieceTypeAt(curRow, curCol) == PieceType::Burst)
+			{
+				matchList = m_gameBoard->GetPieceIndexType(static_cast<int>(m_gameBoard->GetPieceTypeAt(lastRow, lastCol)));
+			}
+			else if (m_gameBoard->GetPieceTypeAt(lastRow, lastCol) == PieceType::Burst)
+			{
+				matchList = m_gameBoard->GetPieceIndexType(static_cast<int>(m_gameBoard->GetPieceTypeAt(curRow, curCol)));
+			}
+			else if (m_gameBoard->GetPieceTypeAt(curRow, curCol) == PieceType::Burst
+				&& m_gameBoard->GetPieceTypeAt(lastRow, lastCol) == PieceType::Burst)
+			{
+				matchList = m_gameBoard->GetAllBoard();
+			}
+			else
+			{
+				matchList1 = m_gameBoard->FindChainAt(curRow, curCol);
+				matchList2 = m_gameBoard->FindChainAt(lastRow, lastCol);
+				for (auto match : matchList1)
+				{
+					matchList.insert(match);
+				}
+				for (auto match : matchList2)
+				{
+					matchList.insert(match);
+				}
+			}
 			m_gameBoard->SetDestroyList(matchList);
 			SetPhase(Phase::DESTROY_PHASE);
 		}
@@ -192,18 +222,21 @@ void GameField::Update(float deltaTime) {
 	}
 	case Phase::DESTROY_PHASE:
 	{
+		//printf("begin destroy phase\n");
 		m_click.clear();
 		auto destroyList = m_gameBoard->GetDestroyList();
 		m_gameBoard->m_selected_piece->Set2DPosition(-200, -200);
 		m_gameBoard->m_selected_piece2->Set2DPosition(-200, -200);
 		m_pieceList = m_gameBoard->GetPieceTypeMatchedList(destroyList);
-		Calculate(m_pieceList, m_currentTurn);
+		Calculate(m_pieceList, m_currentTurn);	
 		m_gameBoard->DestroyPieces(destroyList);
 		m_gameBoard->RefillGameBoard();
+		
 		if (m_pieceList[static_cast<int>(PieceType::Sword)] > 0) {
 			if (m_currentTurn == PLAYER_TURN && !m_player->IsMuted()) {
 				 m_player->SetAttackNum(m_pieceList[static_cast<int>(PieceType::Sword)]);
 				 m_player->SetIsAttack(true);
+
 			}
 			else if(m_currentTurn == ENEMY_TURN && !m_enemy->IsMuted()) {
 				m_enemy->SetAttackNum(m_pieceList[static_cast<int>(PieceType::Sword)]);
@@ -218,7 +251,7 @@ void GameField::Update(float deltaTime) {
 		if (m_gameBoard->IsRefilling()) {
 			m_gameBoard->RefillPositionGameBoard(deltaTime);
 		}else{
-			if ( true) {
+			if (true) {
 				auto matchList = m_gameBoard->GetPieceIndexMatchedList();
 				if (!matchList.empty()) {
 					auto matchList = m_gameBoard->GetPieceIndexMatchedList();
@@ -309,6 +342,14 @@ void GameField::Draw() {
 	m_info->Draw();
 	for(auto it:m_infoText)
 		it->Draw();
+	for (auto it : m_score)
+	{
+		it->Draw();
+	}
+	for (auto it : m_opponentScore)
+	{
+		it->Draw();
+	}
 }
 
 void GameField::SetPhase(Phase phase) {
@@ -388,26 +429,126 @@ void GameField::Calculate(std::vector<int> pieceList,bool isPlayer) {
 		Spell 4,
 		Sword 5 ,*/
 		int hp = 10*pieceList[static_cast<int>(PieceType::Heart)];
-		int mana= 10*pieceList[static_cast<int>(PieceType::Mana)];
+		if (pieceList[static_cast<int>(PieceType::Heart)] > 3)
+		{
+			hp = 12 * pieceList[static_cast<int>(PieceType::Heart)];
+		}
+		int mana = 10 * pieceList[static_cast<int>(PieceType::Mana)];
+		if (pieceList[static_cast<int>(PieceType::Mana)] > 3)
+		{
+			mana = 12 * pieceList[static_cast<int>(PieceType::Mana)];
+		}
 		int poison= 5*pieceList[static_cast<int>(PieceType::Poison)];
-		int shield= 10*pieceList[static_cast<int>(PieceType::Shield)];
+		int shield = 10 * pieceList[static_cast<int>(PieceType::Shield)];
+		if (pieceList[static_cast<int>(PieceType::Shield)] > 3)
+		{
+			shield = 12 * pieceList[static_cast<int>(PieceType::Shield)];
+		}
 		int spell= 10*pieceList[static_cast<int>(PieceType::Spell)];
+
+		auto shader = ResourceManagers::GetInstance()->GetShader("TextShader");
+		std::shared_ptr<Font> font = ResourceManagers::GetInstance()->GetFont("EvilEmpire-4BBVK.ttf");
+		std::shared_ptr<Text> text = std::make_shared<Text>(shader, font, "", Vector4(1.0f, 0.5f, 0.0f, 1.0f), 1.2f);
+
+		float txtPlayerWidth = 120.0f;
+		float txtHeight = Globals::screenHeight - 145.0f;
+		float txtEnemyWidth = Globals::screenWidth / 2.0f + 100.0f;
+
 	if (isPlayer) {
+		text->Set2DPosition(Vector2(txtPlayerWidth, txtHeight));
+
+		if (hp > 0)
+		{
+			text->SetColor(Vector4(255.0f, 0.0f, 0.0f, 1.0f));
+			text->SetText("+ " + std::to_string(hp));
+			m_score.clear();
+			m_score.push_back(text);
+		}
 		m_player->Heal(hp);
+
+		if (mana > 0)
+		{
+			text->SetColor(Vector4(255.0f, 255.0f, 0.0f, 1.0f));
+			text->SetText("+ " + std::to_string(mana));
+			m_score.clear();
+			m_score.push_back(text);
+		}
 		m_player->GainMana(mana);
+
 		m_enemy->Poisoned(poison);
+
+		if (shield > 0)
+		{
+			text->SetColor(Vector4(255.0f, 255.0f, 255.0f, 1.0f));
+			text->SetText("+ " + std::to_string(shield));
+			m_score.clear();
+			m_score.push_back(text);
+		}
 		m_player->SetDefense(shield+m_player->GetDefense());
 		spell = (m_enemy->GetCurrentMana() < spell ? m_enemy->GetCurrentMana() : spell);
+
+		if (spell > 0)
+		{
+			text->SetColor(Vector4(255.0f, 255.0f, 0.0f, 1.0f));
+			text->SetText("+ " + std::to_string(spell));
+			m_score.clear();
+			m_score.push_back(text);
+
+			text->SetColor(Vector4(255.0f, 255.0f, 0.0f, 1.0f));
+			text->SetText("- " + std::to_string(spell));
+			text->Set2DPosition(Vector2(txtEnemyWidth, txtHeight));
+			m_opponentScore.push_back(text);
+		}
 		m_player->GainMana(spell);
 		m_enemy->LostMana(spell);
 
+
 	}
 	else {
+		text->Set2DPosition(Vector2(txtEnemyWidth, txtHeight));
+
+		if (hp > 0)
+		{
+			text->SetColor(Vector4(255.0f, 0.0f, 0.0f, 1.0f));
+			text->SetText("+ " + std::to_string(hp));
+			m_score.clear();
+			m_score.push_back(text);
+		}
 		m_enemy->Heal(hp);
+
+		if (mana > 0)
+		{
+			text->SetColor(Vector4(255.0f, 255.0f, 0.0f, 1.0f));
+			text->SetText("+ " + std::to_string(mana));
+			m_score.clear();
+			m_score.push_back(text);
+		}
 		m_enemy->GainMana(mana);
+
 		m_player->Poisoned(poison);
+
+		if (shield > 0)
+		{
+			text->SetColor(Vector4(255.0f, 255.0f, 255.0f, 1.0f));
+			text->SetText("+ " + std::to_string(shield));
+			m_score.clear();
+			m_score.push_back(text);
+		}
 		m_enemy->SetDefense(shield + m_enemy->GetDefense());
+
 		spell = (m_player->GetCurrentMana() < spell ? m_player->GetCurrentMana() : spell);
+		if (spell > 0)
+		{
+			text->SetColor(Vector4(255.0f, 255.0f, 0.0f, 1.0f));
+			text->SetText("+ " + std::to_string(spell));
+			m_score.clear();
+			m_score.push_back(text);
+
+			text->SetColor(Vector4(255.0f, 255.0f, 0.0f, 1.0f));
+			text->SetText("- " + std::to_string(spell));
+			text->Set2DPosition(Vector2(txtPlayerWidth, txtHeight));
+			m_opponentScore.push_back(text);
+		}
 		m_enemy->GainMana(spell);
 		m_player->LostMana(spell);
 	}

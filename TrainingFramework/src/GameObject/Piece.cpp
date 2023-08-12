@@ -62,6 +62,11 @@ PieceType Piece::GetType() {
 	return m_type;
 }
 
+void Piece::SetType(PieceType type)
+{
+	m_type = type;
+}
+
 //bool Piece::InRightPosition() {
 //	if (this->Get2DPosition().x != 226 + m_col * 50) return false;
 //	if (this->Get2DPosition().y != 226 + m_row * 50) return false;

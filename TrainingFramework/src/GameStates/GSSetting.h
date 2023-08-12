@@ -3,16 +3,15 @@
 #include "GameButton.h"
 #include "GameStateMachine.h"
 
-class GSMenu :
+class GSSetting :
 	public GameStateBase
 {
 public:
-	GSMenu();
-	~GSMenu();
+	GSSetting();
+	~GSSetting();
 
 	void	Init() override;
 	void	Exit() override;
-
 	void	Pause() override;
 	void	Resume() override;
 
@@ -24,8 +23,9 @@ public:
 	void	Draw() override;
 
 private:
-	std::shared_ptr<Sprite2D>				m_background;
-	std::list<std::shared_ptr<GameButton>>	m_listButton;
-	std::list<std::shared_ptr<Text>>		m_listText;
+	std::shared_ptr<Sprite2D>					m_background;
+	std::vector<std::shared_ptr<GameButton>>	m_listButton;
+	std::list<std::shared_ptr<Text>>			m_listText;
+	std::vector<std::shared_ptr<Sprite2D>>		m_listSprite2D;
 };
 

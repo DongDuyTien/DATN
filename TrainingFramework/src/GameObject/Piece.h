@@ -9,6 +9,10 @@ enum class PieceType
 	Shield,
 	Spell,
 	Sword,
+	Burst,
+	Vertical,
+	Horizontal,
+	Bomb,
 	COUNT
 };
 
@@ -32,4 +36,5 @@ public:
 	void SetRow(int y);
 	int GetRow();
 	PieceType GetType();
+	void SetType(PieceType type);
 };

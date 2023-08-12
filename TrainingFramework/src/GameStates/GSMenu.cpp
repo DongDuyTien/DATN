@@ -3,18 +3,16 @@
 #include "SaveData.h"
 #include "Inventory.h"
 #include "Shop.h"
+#include "GameSetting.h"
 
 GSMenu::GSMenu() : GameStateBase(StateType::STATE_MENU), 
 	m_background(nullptr), m_listButton(std::list<std::shared_ptr<GameButton>>{}), m_listText(std::list<std::shared_ptr<Text>>{})
 {
 }
 
-
 GSMenu::~GSMenu()
 {
 }
-
-
 
 void GSMenu::Init()
 {
@@ -33,12 +31,15 @@ void GSMenu::Init()
 	// continue
 	texture = ResourceManagers::GetInstance()->GetTexture("bg_btn.tga");
 	std::shared_ptr<GameButton> button = std::make_shared<GameButton>(model, shader, texture);
-	button->Set2DPosition(Globals::screenWidth / 2.0f, Globals::screenHeight / 2.0f - 150.0f);
+	button->Set2DPosition(Globals::screenWidth / 2.0f, Globals::screenHeight / 2.0f - 180.0f);
 	button->SetSize(300, 100);
 	if (!SaveData::GetInstance()->IsNewGame())
 	{
 		button->SetOnClick([this]() {
-			ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+			if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+			{
+				ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+			}
 			GameStateMachine::GetInstance()->ChangeState(StateType::STATE_LEVEL);
 			SaveData::GetInstance()->SetIsNewGame(false);
 			
@@ -53,13 +54,29 @@ void GSMenu::Init()
 
 	// new game
 	button = std::make_shared<GameButton>(model, shader, texture);
-	button->Set2DPosition(Globals::screenWidth / 2.0f, Globals::screenHeight / 2.0f);
+	button->Set2DPosition(Globals::screenWidth / 2.0f, Globals::screenHeight / 2.0f - 70.0f);
 	button->SetSize(300, 100);
 	button->SetOnClick([this]() {
 		SaveData::GetInstance()->ClearDataFolder();
 		SaveData::GetInstance()->SetIsNewGame(true);
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_LEVEL);
-		ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		}
+		});
+	m_listButton.push_back(button);
+
+	// game setting
+	button = std::make_shared<GameButton>(model, shader, texture);
+	button->Set2DPosition(Globals::screenWidth / 2.0f, Globals::screenHeight / 2.0f + 40.0f);
+	button->SetSize(300, 100);
+	button->SetOnClick([this]() {
+		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_SETTING);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		}
 		});
 	m_listButton.push_back(button);
 
@@ -69,13 +86,16 @@ void GSMenu::Init()
 	button->SetSize(300, 100);
 	button->SetOnClick([this]() {
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_GUIDE);
-		ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		}
 		});
 	m_listButton.push_back(button);
 
 	// exit
 	button = std::make_shared<GameButton>(model, shader, texture);
-	button->Set2DPosition(Globals::screenWidth / 2.0f, Globals::screenHeight / 2.0f + 300.0f);
+	button->Set2DPosition(Globals::screenWidth / 2.0f, Globals::screenHeight / 2.0f + 260.0f);
 	button->SetSize(300, 100);
 	button->SetOnClick([]() {
 		exit(0);
@@ -86,19 +106,23 @@ void GSMenu::Init()
 	shader = ResourceManagers::GetInstance()->GetShader("TextShader");
 	std::shared_ptr<Font> font = ResourceManagers::GetInstance()->GetFont("EvilEmpire-4BBVK.ttf");
 	std::shared_ptr<Text> text = std::make_shared<Text>(shader, font, "CONTINUE", Vector4(1.0f, 0.5f, 0.0f, 1.0f), 1.8f);
-	text->Set2DPosition(Vector2(Globals::screenWidth / 2.0f - 70.0f, Globals::screenHeight / 2.0f - 145.0f));
+	text->Set2DPosition(Vector2(Globals::screenWidth / 2.0f - 70.0f, Globals::screenHeight / 2.0f - 170.0f));
 	m_listText.push_back(text);
 
 	text = std::make_shared<Text>(shader, font, "NEW GAME", Vector4(1.0f, 0.5f, 0.0f, 1.0f), 1.8f);
-	text->Set2DPosition(Vector2(Globals::screenWidth / 2.0f - 80.0f, Globals::screenHeight / 2.0f + 5.0f));
+	text->Set2DPosition(Vector2(Globals::screenWidth / 2.0f - 80.0f, Globals::screenHeight / 2.0f - 60.0f));
 	m_listText.push_back(text);
 	
+	text = std::make_shared<Text>(shader, font, "SETTING", Vector4(1.0f, 0.5f, 0.0f, 1.0f), 1.8f);
+	text->Set2DPosition(Vector2(Globals::screenWidth / 2.0f - 55.0f, Globals::screenHeight / 2.0f + 50.0f));
+	m_listText.push_back(text);
+
 	text = std::make_shared<Text>(shader, font, "GUIDE", Vector4(1.0f, 0.5f, 0.0f, 1.0f), 1.8f);
 	text->Set2DPosition(Vector2(Globals::screenWidth / 2.0f -40.0f, Globals::screenHeight / 2.0f + 160.0f));
 	m_listText.push_back(text);
 
 	text = std::make_shared<Text>(shader, font, "EXIT", Vector4(1.0f, 0.5f, 0.0f, 1.0f), 1.8f);
-	text->Set2DPosition(Vector2(Globals::screenWidth / 2.0f - 30.0f, Globals::screenHeight / 2.0f + 310.0f));
+	text->Set2DPosition(Vector2(Globals::screenWidth / 2.0f - 30.0f, Globals::screenHeight / 2.0f + 270.0f));
 	m_listText.push_back(text);
 
 	// game title
@@ -109,8 +133,11 @@ void GSMenu::Init()
 	//text->Set2DPosition(Vector2(200, 200));
 	m_listText.push_back(text);
 
-	std::string name = "gravity_fall_theme_sound.wav";
-	ResourceManagers::GetInstance()->PlaySound(name, true);
+	if (GameSetting::GetInstance()->GetTurnOnMusic())
+	{
+		std::string name = "gravity_fall_theme_sound.wav";
+		ResourceManagers::GetInstance()->PlaySound(name, true);
+	}
 }
 
 void GSMenu::Exit()
@@ -119,6 +146,7 @@ void GSMenu::Exit()
 	SaveData::FreeInstance();
 	Inventory::FreeInstance();
 	Shop::FreeInstance();
+	GameSetting::FreeInstance();
 }
 
 
@@ -129,8 +157,11 @@ void GSMenu::Pause()
 
 void GSMenu::Resume()
 {
-	std::string name = "gravity_fall_theme_sound.wav";
-	ResourceManagers::GetInstance()->PlaySound(name, true);
+	if (GameSetting::GetInstance()->GetTurnOnMusic())
+	{
+		std::string name = "gravity_fall_theme_sound.wav";
+		ResourceManagers::GetInstance()->PlaySound(name, true);
+	}
 }
 
 

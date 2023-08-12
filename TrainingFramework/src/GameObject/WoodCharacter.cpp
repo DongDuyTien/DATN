@@ -42,7 +42,7 @@ EarthCharacter::EarthCharacter(std::shared_ptr<Model> model, std::shared_ptr<Sha
 	//skill3
 	m_skills[2]->SetTexture(ResourceManagers::GetInstance()->GetTexture("earth_skill3.tga"));
 	std::vector<std::shared_ptr<Text>> detailOfSkill3;
-	text = std::make_shared<Text>(shader, font, "Mana Cost: 150", Vector4(0.95f, 0.98f, 0.98f, 1.0f), 0.5f);
+	text = std::make_shared<Text>(shader, font, "Terra Shatterguard", Vector4(0.95f, 0.98f, 0.98f, 1.0f), 0.5f);
 	detailOfSkill3.push_back(text);
 	text = std::make_shared<Text>(shader, font, "Mana Cost: 150", Vector4(0.95f, 0.98f, 0.98f, 1.0f), 0.5f);
 	detailOfSkill3.push_back(text);

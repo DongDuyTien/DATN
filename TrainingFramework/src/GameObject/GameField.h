@@ -41,7 +41,8 @@ private:
 	std::shared_ptr<Sprite2D>			m_boardMenu;
 	std::shared_ptr<Sprite2D>			m_info;
 	std::vector<std::shared_ptr<Text>>	m_infoText;
-
+	std::vector<std::shared_ptr<Text>>	m_score;
+	std::vector<std::shared_ptr<Text>>	m_opponentScore;
 
 	std::vector<std::shared_ptr<GameButton>>m_skillButtonList;
 	std::vector<std::pair<int, int>>	m_click;

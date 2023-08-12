@@ -2,6 +2,7 @@
 #include "Sprite2D.h"
 #include "ResourceManagers.h"
 #include "GameStates/GSPlay.h"
+#include "GameSetting.h"
 
 PauseMenu::PauseMenu(GSPlay *gs) : Sprite2D()
 {
@@ -35,8 +36,8 @@ void PauseMenu::Init(GSPlay *gs)
 	m_btnSoundOn = std::make_shared<GameButton>(model, shader, texture);
 	m_btnSoundOn->Set2DPosition((float)Globals::screenWidth / 2.0f - 120.0f, (float)Globals::screenHeight / 2.0f + 25.0f);
 	m_btnSoundOn->SetOnClick([this]() {
+		GameSetting::GetInstance()->SetTurnOnMusic(0);
 		ResourceManagers::GetInstance()->StopSound("gsPlay_sound.wav");
-		m_isPlaySound = false;
 		});
 	// sound off
 	texture = ResourceManagers::GetInstance()->GetTexture("btn_sound_off.tga");
@@ -44,7 +45,7 @@ void PauseMenu::Init(GSPlay *gs)
 	m_btnSoundOff->Set2DPosition((float)Globals::screenWidth / 2.0f - 120.0f, (float)Globals::screenHeight / 2.0f + 25.0f);
 	m_btnSoundOff->SetOnClick([this]() {
 		ResourceManagers::GetInstance()->PlaySound("gsPlay_sound.wav");
-		m_isPlaySound = true;
+		GameSetting::GetInstance()->SetTurnOnMusic(1);
 		});
 	// back
 	texture = ResourceManagers::GetInstance()->GetTexture("btn_back.tga");
@@ -52,7 +53,10 @@ void PauseMenu::Init(GSPlay *gs)
 	button->Set2DPosition((float)Globals::screenWidth / 2.0f - 45.0f, (float)Globals::screenHeight / 2.0f + 25.0f);
 	button->SetSize(60.0f, 60.0f);
 	button->SetOnClick([this]() {
-		ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.2f);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.2f);
+		}
 		GameStateMachine::GetInstance()->PopState();
 		});
 	m_listButton.push_back(button);
@@ -62,7 +66,10 @@ void PauseMenu::Init(GSPlay *gs)
 	button->Set2DPosition((float)Globals::screenWidth / 2.0f + 30.0f, (float)Globals::screenHeight / 2.0f + 25.0f);
 	button->SetSize(60.0f, 60.0f);
 	button->SetOnClick([this,gs]() {
-		ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		}
 		GameStateMachine::GetInstance()->PopState();
 		std::shared_ptr<Entity> player = gs->GetPlayer();
 		int currentLevel = gs->GetCurrentLevel();
@@ -75,7 +82,10 @@ void PauseMenu::Init(GSPlay *gs)
 	button->Set2DPosition((float)Globals::screenWidth / 2.0f + 105.0f, (float)Globals::screenHeight / 2.0f + 25.0f);
 	button->SetSize(60.0f, 60.0f);
 	button->SetOnClick([this, gs]() {
-		ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		}
 		PauseMenu::SetSize(0, 0);
 		gs->SetIsPause(false);
 		});
@@ -91,7 +101,7 @@ void PauseMenu::Init(GSPlay *gs)
 
 void PauseMenu::Update(float deltaTime)
 {
-	if (m_isPlaySound)
+	if (GameSetting::GetInstance()->GetTurnOnMusic())
 	{
 		m_btnSoundOn->SetSize(60.0f, 60.0f);
 		m_btnSoundOff->SetSize(0, 0);

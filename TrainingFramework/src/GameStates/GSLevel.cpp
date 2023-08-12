@@ -8,7 +8,10 @@
 
 GSLevel::GSLevel()
 {
-	ResourceManagers::GetInstance()->PlaySound("woodsTheme.wav", true);
+	if (GameSetting::GetInstance()->GetTurnOnMusic())
+	{
+		ResourceManagers::GetInstance()->PlaySound("woodsTheme.wav", true);
+	}
 }
 
 GSLevel::~GSLevel()
@@ -34,7 +37,10 @@ void GSLevel::Init()
 	button->SetSize(60.0f, 60.0f);
 	button->SetOnClick([this]() {
 		GameStateMachine::GetInstance()->PopState();
-		ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
+		}
 		});
 	m_listButton.push_back(button);
 	// shop
@@ -44,7 +50,10 @@ void GSLevel::Init()
 	button->SetSize(200.0f, 70.0f);
 	button->SetOnClick([this]() {
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_SHOP);
-		ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		}
 		});
 	m_listButton.push_back(button);
 	shader = ResourceManagers::GetInstance()->GetShader("TextShader");
@@ -63,17 +72,26 @@ void GSLevel::Init()
 
 void GSLevel::Exit()
 {
-	ResourceManagers::GetInstance()->StopSound("woodsTheme.wav");
+	if (GameSetting::GetInstance()->GetTurnOnMusic())
+	{
+		ResourceManagers::GetInstance()->StopSound("woodsTheme.wav");
+	}
 }
 
 void GSLevel::Pause()
 {
-	ResourceManagers::GetInstance()->StopSound("woodsTheme.wav");
+	if (GameSetting::GetInstance()->GetTurnOnMusic())
+	{
+		ResourceManagers::GetInstance()->StopSound("woodsTheme.wav");
+	}
 }
 
 void GSLevel::Resume()
 {
-	ResourceManagers::GetInstance()->PlaySound("woodsTheme.wav", true);
+	if (GameSetting::GetInstance()->GetTurnOnMusic())
+	{
+		ResourceManagers::GetInstance()->PlaySound("woodsTheme.wav", true);
+	}
 	m_level->Init();
 	m_playerManager->GetPlayer()->SetTexture(ResourceManagers::GetInstance()->GetTexture(m_playerManager->GetPlayer()->	GetName() + "_idle.tga"), true);
 	m_playerManager->GetPlayer()->Set2DPosition(Globals::screenWidth / 2.0f - 150.0f, Globals::screenHeight / 2.0f - 50.0f);
@@ -125,6 +143,7 @@ void GSLevel::Update(float deltaTime)
 		GameStateMachine::GetInstance()->ChangeState(std::make_shared<GSPlay>(m_playerManager->GetPlayer(), m_level->GetSelectedLevel()));
 		m_level->SetSelectedLevel(0);
 	}
+	m_level->Update(deltaTime);
 }
 
 void GSLevel::Draw()

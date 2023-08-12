@@ -14,7 +14,6 @@ private:
 	std::shared_ptr<GameButton>				m_btnSoundOn;
 	std::shared_ptr<GameButton>				m_btnSoundOff;
 	std::list<std::shared_ptr<Text>>		m_listText;
-	bool m_isPlaySound = true;
 public:
 	PauseMenu(GSPlay *gs);
 	~PauseMenu();

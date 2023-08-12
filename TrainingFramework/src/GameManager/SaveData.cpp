@@ -100,7 +100,7 @@ int SaveData::LoadLevel()
 	{
 		int success = fscanf(fp, "%s %d", sTmp, &numPassedLevel);
 		fclose(fp);
-		std::printf("%s %d\n", "LevelPassed:", numPassedLevel);
+		//std::printf("%s %d\n", "LevelPassed:", numPassedLevel);
 	}
 	return numPassedLevel;
 }

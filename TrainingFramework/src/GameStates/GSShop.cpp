@@ -2,10 +2,11 @@
 #include "Camera.h"
 #include "SaveData.h"
 #include "ResourceManagers.h"
+#include "GameSetting.h"
 
 GSShop::GSShop()
 {
-	
+	m_page = 1;
 }
 
 
@@ -20,6 +21,7 @@ void GSShop::Init()
 	m_coinToReset = 50;
 	m_coins = SaveData::GetInstance()->GetCoins();
 	m_shop = Shop::GetInstance();
+	m_moneyShop = std::make_shared<MoneyShop>();
 
 	auto model = ResourceManagers::GetInstance()->GetModel("Sprite2D.nfg");
 	auto shader = ResourceManagers::GetInstance()->GetShader("TextureShader");
@@ -57,7 +59,10 @@ void GSShop::Init()
 	button->SetSize(60.0f, 60.0f);
 	button->SetOnClick([this]() {
 		GameStateMachine::GetInstance()->PopState();
-		ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
+		}
 		});
 	m_listButton.push_back(button);
 	// reset
@@ -66,10 +71,39 @@ void GSShop::Init()
 	button->Set2DPosition(Globals::screenWidth / 2.0f + 200.0f, Globals::screenHeight / 2.0f - 210.0f);
 	button->SetSize(30.0f, 30.0f);
 	button->SetOnClick([this]() {
-		ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
+		}
 		m_shop->CreateItem();
 		m_coins = m_coins - m_coinToReset;
 		SaveData::GetInstance()->SaveCoins(m_coins);
+		});
+	m_listButton.push_back(button);
+	// next page
+	texture = ResourceManagers::GetInstance()->GetTexture("btn_resume.tga");
+	button = std::make_shared<GameButton>(model, shader, texture);
+	button->Set2DPosition(Globals::screenWidth - 50.0f, Globals::screenHeight / 2.0f);
+	button->SetSize(60.0f, 60.0f);
+	button->SetOnClick([this]() {
+		m_page = 2;
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
+		}
+		});
+	m_listButton.push_back(button);
+	// back shop
+	texture = ResourceManagers::GetInstance()->GetTexture("btn_back.tga");
+	button = std::make_shared<GameButton>(model, shader, texture);
+	button->Set2DPosition(50.0f, Globals::screenHeight / 2.0f);
+	button->SetSize(60.0f, 60.0f);
+	button->SetOnClick([this]() {
+		m_page = 1;
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
+		}
 		});
 	m_listButton.push_back(button);
 	// text
@@ -121,7 +155,14 @@ void GSShop::HandleKeyEvents(int key, bool bIsPressed)
 
 void GSShop::HandleTouchEvents(float x, float y, bool bIsPressed)
 {
-	m_shop->HandleTouchEvents(x, y, bIsPressed);
+	if (m_page == 1)
+	{
+		m_shop->HandleTouchEvents(x, y, bIsPressed);
+	}
+	else if (m_page == 2)
+	{
+		m_moneyShop->HandleTouchEvents(x, y, bIsPressed);
+	}
 
 	for (auto button : m_listButton)
 	{
@@ -141,7 +182,23 @@ void GSShop::Update(float deltaTime)
 	m_coins = SaveData::GetInstance()->GetCoins();
 	m_coinsTxt->SetText(std::to_string(m_coins));
 
-	m_shop->Update(deltaTime);
+	if (m_page == 1)
+	{
+		m_shop->Update(deltaTime);
+		m_listText[0]->SetText("SHOP");
+		m_listText[0]->Set2DPosition(Vector2(Globals::screenWidth / 2.0f - 30.0f, Globals::screenHeight / 2.0f - 270.0f));
+		m_listSprite2D[1]->SetSize(220.0f, 70.0f);
+	}
+	else if (m_page == 2)
+	{
+		m_moneyShop->Update(deltaTime);
+		m_listText[0]->SetText("MONEY SHOP");
+		m_listText[0]->Set2DPosition(Vector2(Globals::screenWidth / 2.0f - 90.0f, Globals::screenHeight / 2.0f - 270.0f));
+		m_listSprite2D[1]->SetSize(240.0f, 80.0f);
+
+		m_moneyShop->Update(deltaTime);
+
+	}
 	for (auto it : m_listButton)
 	{
 		it->Update(deltaTime);
@@ -164,5 +221,12 @@ void GSShop::Draw()
 		it->Draw();
 	}
 	m_coinsTxt->Draw();
-	m_shop->Draw();
+	if (m_page == 1)
+	{
+		m_shop->Draw();
+	}
+	else if (m_page == 2)
+	{
+		m_moneyShop->Draw();
+	}
 }

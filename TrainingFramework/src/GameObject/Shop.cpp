@@ -67,11 +67,11 @@ void Shop::Init()
 		
 		std::vector<std::string> EquipmentInfor = SaveData::GetInstance()->GetEquipmentInformation(1, type);
 		std::shared_ptr<Equipment> equipment = std::make_shared<Equipment>(model, shader, texture, EquipmentInfor[0], 1, stoi(EquipmentInfor[2]), 1, type, false);
-		if (Inventory::GetInstance()->HasEquipment(equipment))
+		/*if (Inventory::GetInstance()->HasEquipment(equipment))
 		{
 			texture = ResourceManagers::GetInstance()->GetTexture(i == 0 ? "weapon1_sold.tga" : "shield1_sold.tga");
 			equipment->SetTexture(texture);
-		}
+		}*/
 		switch (i)
 		{
 		case 0:
@@ -244,7 +244,19 @@ void Shop::Update(float deltaTime)
 		{
 			if (Inventory::GetInstance()->HasEquipment(m_listEquipment[i]))
 			{
-				auto texture = ResourceManagers::GetInstance()->GetTexture(i == 0 ? "weapon1_sold.tga" : "shield1_sold.tga");
+				std::shared_ptr<Texture> texture;
+				if (i == 0)
+				{
+					texture = ResourceManagers::GetInstance()->GetTexture("weapon1_sold.tga");
+				}
+				else if (i == 1)
+				{
+					texture = ResourceManagers::GetInstance()->GetTexture("shield1_sold.tga");
+				}
+				else if (i == 2)
+				{
+					texture = ResourceManagers::GetInstance()->GetTexture("chest.tga");
+				}
 				m_listEquipment[i]->SetTexture(texture);
 			}
 		}

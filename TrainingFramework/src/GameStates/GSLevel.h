@@ -4,6 +4,7 @@
 #include "GameStateBase.h"
 #include "GameButton.h"
 #include "GameStateMachine.h"
+#include "GameSetting.h"
 
 class Sprite2D;
 class Text;
@@ -23,7 +24,6 @@ private:
 	std::list<std::shared_ptr<SpriteAnimation>>	m_listAnimation;
 	std::shared_ptr<Level>						m_level;
 	std::shared_ptr<PlayerManager>				m_playerManager;
-	
 
 public:
 	GSLevel();

@@ -107,11 +107,15 @@ void EndGameMenu::Init(bool isFirstWin)
 		int currentLevel = state->GetCurrentLevel();
 		if (isFirstWin)
 		{
-			text->SetText(std::to_string(currentLevel * 25));
+			int coin = currentLevel * 25;
+			text->SetText(std::to_string(coin));
+			SaveData::GetInstance()->SaveCoins(SaveData::GetInstance()->GetCoins() + coin);
 		}
 		else
 		{
-			text->SetText(std::to_string(currentLevel * 5));
+			int coin = currentLevel * 5;
+			text->SetText(std::to_string(coin));
+			SaveData::GetInstance()->SaveCoins(SaveData::GetInstance()->GetCoins() + coin);
 		}
 	}
 	else text->SetText("Game Over");

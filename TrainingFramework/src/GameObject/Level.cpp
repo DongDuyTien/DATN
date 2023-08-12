@@ -14,8 +14,6 @@ Level::~Level()
 
 void Level::Init()
 {
-	
-
 	m_numPassedLevel = SaveData::GetInstance()->LoadLevel();
 	auto model = ResourceManagers::GetInstance()->GetModel("Sprite2D.nfg");
 	auto shader = ResourceManagers::GetInstance()->GetShader("TextureShader");
@@ -67,6 +65,31 @@ void Level::Init()
 			m_listText.push_back(text);
 		}
 	}
+	// next
+	shader = ResourceManagers::GetInstance()->GetShader("TextureShader");
+	texture = ResourceManagers::GetInstance()->GetTexture("btn_resume.tga");
+	std::shared_ptr<GameButton> button = std::make_shared<GameButton>(model, shader, texture);
+	button->Set2DPosition(Globals::screenWidth - 20.0f, Globals::screenHeight / 2.0f);
+	button->SetSize(50, 50);
+	button->SetOnClick([this]() {
+		ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
+		if(m_pageNum == 1)
+			m_pageNum = 2;
+		printf("%d\n", m_pageNum);
+		});
+	m_changePageBtn.push_back(button);
+	//back
+	texture = ResourceManagers::GetInstance()->GetTexture("btn_back.tga");
+	button = std::make_shared<GameButton>(model, shader, texture);
+	button->Set2DPosition(Globals::screenWidth / 2.0f + 20.0f, Globals::screenHeight / 2.0f);
+	button->SetSize(50, 50);
+	button->SetOnClick([this]() {
+		ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
+		if (m_pageNum == 2)
+			m_pageNum = 1;
+		printf("%d\n", m_pageNum);
+		});
+	m_changePageBtn.push_back(button);
 	// text
 	shader = ResourceManagers::GetInstance()->GetShader("TextShader");
 	std::shared_ptr<Text> text = std::make_shared<Text>(shader, font, "LEVEL", Vector4(50.0f, 30.0f, 0.0f, 1.0f), 1.2f);
@@ -84,6 +107,10 @@ void Level::Draw()
 	{
 		it->Draw();
 	}
+	for (auto it : m_changePageBtn)
+	{
+		it->Draw();
+	}
 	for (auto it : m_listText)
 	{
 		it->Draw();
@@ -94,27 +121,65 @@ void Level::Update(float deltaTime)
 {
 	m_numPassedLevel = SaveData::GetInstance()->LoadLevel();
 
-	for (int i = 0; i < 4; i++)
+	if (m_pageNum == 1)
 	{
-		for (int j = 0; j < 3; j++)
+		for (int i = 0; i < 4; i++)
 		{
-			int curLevel = i * 3 + j + 1;
-			if (curLevel <= m_numPassedLevel + 1)
+			for (int j = 0; j < 3; j++)
 			{
-				auto texture = ResourceManagers::GetInstance()->GetTexture("btn_level.tga");
-				m_listButton[curLevel - 1]->SetTexture(texture);
-				m_listButton[curLevel - 1]->SetOnClick([this, curLevel]() {
-					ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
-					this->SetSelectedLevel(curLevel);
-					});
-			}
-			else
-			{
-				auto texture = ResourceManagers::GetInstance()->GetTexture("btn_level_unclear.tga");
-				m_listButton[curLevel - 1]->SetTexture(texture);
-				m_listButton[curLevel - 1]->SetOnClick([]() {
+				int curLevel = i * 3 + j + 1;
+				if (curLevel <= m_numPassedLevel + 1)
+				{
+					auto texture = ResourceManagers::GetInstance()->GetTexture("btn_level.tga");
+					m_listButton[curLevel - 1]->SetTexture(texture);
+					m_listButton[curLevel - 1]->SetOnClick([this, curLevel]() {
+						ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+						this->SetSelectedLevel(curLevel);
+						});
 
-					});
+					m_listText[curLevel - 1]->SetText(std::to_string(curLevel));
+				}
+				else
+				{
+					auto texture = ResourceManagers::GetInstance()->GetTexture("btn_level_unclear.tga");
+					m_listButton[curLevel - 1]->SetTexture(texture);
+					m_listButton[curLevel - 1]->SetOnClick([]() {
+
+						});
+					m_listText[curLevel - 1]->SetText(std::to_string(curLevel));
+				}
+			}
+		}
+	}
+	else if (m_pageNum == 2)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				int curLevel = i * 3 + j + 1 + 12;
+				if (curLevel <= m_numPassedLevel + 1)
+				{
+					auto texture = ResourceManagers::GetInstance()->GetTexture("btn_level.tga");
+					m_listButton[curLevel - 1 - 12]->SetTexture(texture);
+					m_listButton[curLevel - 1 - 12]->SetOnClick([this, curLevel]() {
+						ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+						this->SetSelectedLevel(curLevel);
+						});
+
+					m_listText[i * 3 + j]->SetText(std::to_string(curLevel));
+					
+				}
+				else
+				{
+					auto texture = ResourceManagers::GetInstance()->GetTexture("btn_level_unclear.tga");
+					m_listButton[curLevel - 1 - 12]->SetTexture(texture);
+					m_listButton[curLevel - 1 - 12]->SetOnClick([]() {
+
+						});
+
+					m_listText[i * 3 + j]->SetText(std::to_string(curLevel));
+				}
 			}
 		}
 	}
@@ -128,6 +193,13 @@ void Level::Update(float deltaTime)
 void Level::HandleTouchEvents(float x, float y, bool bIsPressed)
 {
 	for (auto button : m_listButton)
+	{
+		if (button->HandleTouchEvents(x, y, bIsPressed))
+		{
+			break;
+		}
+	}
+	for (auto button : m_changePageBtn)
 	{
 		if (button->HandleTouchEvents(x, y, bIsPressed))
 		{

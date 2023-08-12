@@ -17,7 +17,6 @@ private:
 	float								m_standbyTime;
 
 
-
 public:
 	std::shared_ptr<Sprite2D>								m_selected_piece;
 	std::shared_ptr<Sprite2D>								m_selected_piece2;
@@ -41,7 +40,7 @@ public:
 
 	void							SetDestroyList(std::set<std::pair<int, int>>list);
 	std::set<std::pair<int, int>>	GetDestroyList();
-	std::set<std::pair<int, int>>	GetPieceIndexMatchedList();
+	std::set<std::pair<int, int>>	GetPieceIndexMatchedList(int curRow = -1, int curCol = -1, int lastRow = -1, int lastCol = -1);
 	std::set<std::pair<int, int>>	GetPieceIndexType(int type);
 
 	std::vector<int>				GetPieceTypeMatchedList(std::set<std::pair<int, int>> pieceIndexMatchedList);
@@ -51,5 +50,8 @@ public:
 	void							RefillGameBoard(); //Refill Gameboard after destroy but wrong position;
 	void							RefillPositionGameBoard(float deltaTime); //Dropping the piece 
 	void							Draw();
-	//void Update(float deltaTime);
+	bool							CheckBurst(int row, int col);
+	std::set<std::pair<int, int>>   FindChainAt(int row, int col);
+	std::set<std::pair<int, int>>   GetAllBoard();
+	PieceType						GetPieceTypeAt(int row, int col);
 };

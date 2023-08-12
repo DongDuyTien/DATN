@@ -153,14 +153,13 @@ void GameBoard::Draw() {
 	m_selected_piece2->Draw();
 }
 
-std::set<std::pair<int,int>> GameBoard::GetPieceIndexMatchedList() {
+std::set<std::pair<int,int>> GameBoard::GetPieceIndexMatchedList(int curRow, int curCol, int lastRow, int lastCol) {
 	std::set<std::shared_ptr<Piece>> matchingListOfBoard;
 	std::queue<std::shared_ptr<Piece>> matchingListNeighbor;
 
-
 	for (int i = 0; i < 8; i++) {
-		for (int j = 0; j < 7; j++) {
-
+		for (int j = 0; j < 7; j++) 
+		{
 			if (matchingListNeighbor.size() == 0 ) {
 				matchingListNeighbor.push(m_board[i][j]);
 			}
@@ -169,12 +168,10 @@ std::set<std::pair<int,int>> GameBoard::GetPieceIndexMatchedList() {
 			}
 			else {
 				if (matchingListNeighbor.size() >= 3) {
-
+					
 					while (!matchingListNeighbor.empty()) {
 						matchingListOfBoard.insert(matchingListNeighbor.front());
-
 						matchingListNeighbor.pop();
-
 					}
 				}
 				else {
@@ -193,8 +190,6 @@ std::set<std::pair<int,int>> GameBoard::GetPieceIndexMatchedList() {
 
 			while (!matchingListNeighbor.empty()) {
 				matchingListOfBoard.insert(matchingListNeighbor.front());
-
-
 				matchingListNeighbor.pop();
 
 			}
@@ -219,12 +214,9 @@ std::set<std::pair<int,int>> GameBoard::GetPieceIndexMatchedList() {
 			}
 			else {
 				if (matchingListNeighbor.size() >= 3) {
-
 					while (!matchingListNeighbor.empty()) {
 						matchingListOfBoard.insert(matchingListNeighbor.front());
-
 						matchingListNeighbor.pop();
-
 					}
 				}
 				else {
@@ -240,14 +232,42 @@ std::set<std::pair<int,int>> GameBoard::GetPieceIndexMatchedList() {
 				matchingListNeighbor.push(m_board[7][j]);
 			}
 		if (matchingListNeighbor.size() >= 3) {
-
 			while (!matchingListNeighbor.empty()) {
+				/*if (m_burst == 1 && flag == 1)
+				{
+					bool firstSelect = false, secondSelect = false;
+					printf("%s\n", "burst and flag equal 1");
+					if ((matchingListNeighbor.front()->GetRow() == curRow
+						&& matchingListNeighbor.front()->GetCol() == curCol))
+					{
+						firstSelect = true;
+					}
+					if ((matchingListNeighbor.front()->GetRow() == lastRow)
+						&& (matchingListNeighbor.front()->GetCol() == lastCol))
+					{
+						secondSelect = true;
+					}
+					if (firstSelect)
+					{
+						m_board[curRow][curCol]->SetType(PieceType::Burst);
+						auto texture = ResourceManagers::GetInstance()->GetTexture("item3.tga");
+						m_board[curRow][curCol]->SetTexture(texture);
+					}
+					else if (secondSelect)
+					{
+						m_board[lastRow][lastCol]->SetType(PieceType::Burst);
+						auto texture = ResourceManagers::GetInstance()->GetTexture("item3.tga");
+						m_board[lastRow][lastCol]->SetTexture(texture);
+					}
+					m_burst = 0;
+					printf("%s\n", "create bomb");
+				}
+				else
+				{
+					matchingListOfBoard.insert(matchingListNeighbor.front());
+				}*/
 				matchingListOfBoard.insert(matchingListNeighbor.front());
-
-
-
 				matchingListNeighbor.pop();
-
 			}
 		}
 		else {
@@ -356,7 +376,7 @@ void GameBoard::RefillGameBoard() {
 
 		int temp = nullCount;//the number of pieces on the top of the board waiting to drop;
 		while (nullCount--) {
-			PieceType type = static_cast<PieceType>(rand()%static_cast<int>(PieceType::COUNT));
+			PieceType type = static_cast<PieceType>(rand() % (static_cast<int>(PieceType::COUNT) - 4));
 			std::shared_ptr<Piece> p = std::make_shared<Piece>(nullCount, j, type);
 			p->Set2DPosition(GB_posX + Pi_size/2 + Pi_size*j , GB_posY + (nullCount-temp) * Pi_size + Pi_size/2);
 			m_board[nullCount][j] = p;
@@ -572,7 +592,10 @@ std::vector<std::vector<int>> GameBoard::GetAvailableMoveList() {
 bool GameBoard::CanSwapTwoPiece(int lastRow, int lastCol, int curRow, int curCol) {
 
 	SwapTwoPiece(lastRow, lastCol, curRow, curCol);
-	if (HasAnMatch()) {
+	bool haveBurst = CheckBurst(curRow, curCol);
+
+
+	if (HasAnMatch() || haveBurst) {
 		SwapTwoPiece(lastRow, lastCol, curRow, curCol);
 		return true;
 	}
@@ -582,3 +605,193 @@ bool GameBoard::CanSwapTwoPiece(int lastRow, int lastCol, int curRow, int curCol
 	}
 }
 
+bool GameBoard::CheckBurst(int row, int col)
+{
+	if (m_board[row][col]->GetType() >= PieceType::Burst
+		&& m_board[row][col]->GetType() < PieceType::COUNT)
+	{
+		return true;
+	}
+	else
+		return false;
+}
+
+std::set<std::pair<int, int>> GameBoard::FindChainAt(int row, int col)
+{
+	int matchCol = 1;
+	int matchRow = 1;
+	std::set<std::pair<int, int>> horizontalMatch;
+	std::set<std::pair<int, int>> verticalMatch;
+	std::set<std::pair<int, int>> matchList;
+
+	// check burst
+	if (m_board[row][col]->GetType() == PieceType::Horizontal)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			matchList.insert(std::make_pair(row, j));
+		}
+		return matchList;
+	}
+	if (m_board[row][col]->GetType() == PieceType::Vertical)
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			matchList.insert(std::make_pair(i, col));
+		}
+		return matchList;
+	}
+	if (m_board[row][col]->GetType() == PieceType::Bomb)
+	{
+		for (int i = row - 1; i <= row + 1; i++)
+		{
+			for (int j = col - 1; j <= col + 1; j++)
+			{
+				if (i >= 0 && i < 8 && j >= 0 && j < 8)
+				{
+					matchList.insert(std::make_pair(i, j));
+				}
+			}
+		}
+		return matchList;
+	}
+
+	// check left
+	int i = row;
+	int j = col - 1;
+	while (j >= 0)
+	{
+		if (m_board[row][col]->GetType() == m_board[i][j]->GetType())
+		{
+			matchCol++;
+			horizontalMatch.insert(std::make_pair(i, j));
+			j--;
+		}
+		else
+		{
+			break;
+		}
+	}
+	// check right
+	i = row;
+	j = col + 1;
+	while (j < 8)
+	{
+		if (m_board[row][col]->GetType() == m_board[i][j]->GetType())
+		{
+			matchCol++;
+			horizontalMatch.insert(std::make_pair(i, j));
+			j++;
+		}
+		else
+		{
+			break;
+		}
+	}
+	// check up
+	i = row - 1;
+	j = col;
+	while (i >= 0)
+	{
+		if (m_board[row][col]->GetType() == m_board[i][j]->GetType())
+		{
+			matchRow++;
+			verticalMatch.insert(std::make_pair(i, j));
+			i--;
+		}
+		else
+		{
+			break;
+		}
+	}
+	// check down
+	i = row + 1;
+	j = col;
+	while (i < 8)
+	{
+		if (m_board[row][col]->GetType() == m_board[i][j]->GetType())
+		{
+			matchRow++;
+			verticalMatch.insert(std::make_pair(i, j));
+			i++;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (matchCol >= 3 && matchRow < 3)
+	{
+		if (matchCol == 4)
+		{
+			m_board[row][col]->SetType(PieceType::Vertical);
+			auto texture = ResourceManagers::GetInstance()->GetTexture("vertical.tga");
+			m_board[row][col]->SetTexture(texture);
+		}
+		else if (matchCol == 3)
+		{
+			horizontalMatch.insert(std::make_pair(row, col));
+		}
+		for (auto it : horizontalMatch)
+		{
+			//printf("%s %d %d\n", "Horizontal Match:", it.first, it.second);
+			matchList.insert(it);
+		}
+	}
+	if (matchRow >= 3 && matchCol < 3)
+	{
+		if (matchRow == 4)
+		{
+			m_board[row][col]->SetType(PieceType::Horizontal);
+			auto texture = ResourceManagers::GetInstance()->GetTexture("horizontal.tga");
+			m_board[row][col]->SetTexture(texture);
+		}
+		else if (matchRow == 3)
+		{
+			verticalMatch.insert(std::make_pair(row, col));
+		}
+		for (auto it : verticalMatch)
+		{
+			matchList.insert(it);
+		}
+	}
+	if (matchRow >= 3 && matchCol >= 3)
+	{
+		m_board[row][col]->SetType(PieceType::Bomb);
+		auto texture = ResourceManagers::GetInstance()->GetTexture("item3.tga");
+		m_board[row][col]->SetTexture(texture);
+		for (auto it : horizontalMatch)
+		{
+			matchList.insert(it);
+		}
+		for (auto it : verticalMatch)
+		{
+			matchList.insert(it);
+		}
+	}
+	if (matchRow >= 5 || matchCol >= 5)
+	{
+		m_board[row][col]->SetType(PieceType::Burst);
+		auto texture = ResourceManagers::GetInstance()->GetTexture("match5.tga");
+		m_board[row][col]->SetTexture(texture);
+	}
+	return matchList;
+}
+
+std::set<std::pair<int, int>> GameBoard::GetAllBoard()
+{
+	std::set<std::pair<int, int>> matchList;
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			matchList.insert(std::make_pair(i, j));
+		}
+	}
+	return matchList;
+}
+
+PieceType GameBoard::GetPieceTypeAt(int row, int col)
+{
+	return m_board[row][col]->GetType();
+}

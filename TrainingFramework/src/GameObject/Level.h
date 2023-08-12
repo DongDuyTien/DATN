@@ -8,10 +8,12 @@ class Level : public Sprite2D, public CSingleton<Level>
 {
 private:
 	std::list<std::shared_ptr<Sprite2D>>		m_listSprite2D;
-	std::list<std::shared_ptr<Text>>			m_listText;
-	std::vector<std::shared_ptr<GameButton>>		m_listButton;
+	std::vector<std::shared_ptr<Text>>			m_listText;
+	std::vector<std::shared_ptr<GameButton>>	m_listButton;
+	std::vector<std::shared_ptr<GameButton>>	m_changePageBtn;
 	int m_numPassedLevel = 0;
 	int m_currentLevel = 0;
+	int m_pageNum = 1;
 public:
 	Level();
 	~Level();

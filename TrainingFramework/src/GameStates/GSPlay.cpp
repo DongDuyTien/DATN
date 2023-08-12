@@ -1,5 +1,4 @@
 #include "GSPlay.h"
-
 #include "Shader.h"
 #include "Texture.h"
 #include "Model.h"
@@ -13,13 +12,14 @@
 #include "Piece.h"
 #include "GameField.h"
 #include "Player.h"
-#include"Entity.h"
-#include"WaterCharacter.h"
+#include "Entity.h"
+#include "WaterCharacter.h"
 #include <Windows.h>
 #include "Level.h"
 #include "SaveData.h"
 #include "EndGameMenu.h"
-#include"Entity.h"
+#include "GameSetting.h"
+
 GSPlay::GSPlay()
 {
 	m_KeyPress = 0;
@@ -57,7 +57,10 @@ void GSPlay::Init()
 	button->Set2DPosition(Globals::screenWidth - 50.0f, 50.0f);
 	button->SetSize(50, 50);
 	button->SetOnClick([this]() {
-		ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		}
 		this->Pause();
 		});
 	m_listButton.push_back(button);
@@ -67,7 +70,10 @@ void GSPlay::Init()
 	button->Set2DPosition(50.0f, 50.0f);
 	button->SetSize(50, 50);
 	button->SetOnClick([this]() {
-		ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		if (GameSetting::GetInstance()->GetTurnOnSoundEffect())
+		{
+			ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
+		}
 		m_isInventoryPressed = true;
 		this->Pause();
 		});
@@ -75,18 +81,22 @@ void GSPlay::Init()
 	//
 	m_KeyPress = 0;
 
-	std::string soundName = "gsPlay_sound.wav";
-	ResourceManagers::GetInstance()->PlaySound(soundName, true);
-
+	if (GameSetting::GetInstance()->GetTurnOnMusic())
+	{
+		std::string soundName = "gsPlay_sound.wav";
+		ResourceManagers::GetInstance()->PlaySound(soundName, true);
+	}
 	std::cout << "GSPlay Init" << std::endl;
-
 }
 
 void GSPlay::Exit()
 
 {
-	std::string soundName = "gsPlay_sound.wav";
-	ResourceManagers::GetInstance()->StopSound(soundName);
+	if (GameSetting::GetInstance()->GetTurnOnMusic())
+	{
+		std::string soundName = "gsPlay_sound.wav";
+		ResourceManagers::GetInstance()->StopSound(soundName);
+	}
 }
 
 

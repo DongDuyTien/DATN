@@ -139,6 +139,12 @@
     <ClCompile Include="src\GameObject\UseItemMenu.cpp">
       <Filter>TrainingFramework\src\GameObject</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameObject\MoneyShop.cpp">
+      <Filter>TrainingFramework\src\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameStates\GSSetting.cpp">
+      <Filter>TrainingFramework\src\GameStates</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Application.h">
@@ -285,6 +291,15 @@
     </ClInclude>
     <ClInclude Include="src\nlohmann\ordered_map.hpp">
       <Filter>TrainingFramework\src\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameObject\MoneyShop.h">
+      <Filter>TrainingFramework\src\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameManager\GameSetting.h">
+      <Filter>TrainingFramework\src\GameManager</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameStates\GSSetting.h">
+      <Filter>TrainingFramework\src\GameStates</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -356,6 +356,7 @@
     <ClCompile Include="src\GameManager\SaveData.cpp" />
     <ClCompile Include="src\GameObject\Inventory.cpp" />
     <ClCompile Include="src\GameObject\InventoryMenu.cpp" />
+    <ClCompile Include="src\GameObject\MoneyShop.cpp" />
     <ClCompile Include="src\GameObject\SelectAmountMenu.cpp" />
     <ClCompile Include="src\GameObject\Shop.cpp" />
     <ClCompile Include="src\GameObject\UseItemMenu.cpp" />
@@ -389,12 +390,14 @@
     <ClCompile Include="src\GameStates\GSLevel.cpp" />
     <ClCompile Include="src\GameStates\GSMenu.cpp" />
     <ClCompile Include="src\GameStates\GSPlay.cpp" />
+    <ClCompile Include="src\GameStates\GSSetting.cpp" />
     <ClCompile Include="src\GameStates\GSShop.cpp" />
     <ClCompile Include="src\TrainingFramework.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\GameConfig.h" />
+    <ClInclude Include="src\GameManager\GameSetting.h" />
     <ClInclude Include="src\GameManager\ResourceManagers.h" />
     <ClInclude Include="src\GameManager\SaveData.h" />
     <ClInclude Include="src\GameManager\Singleton.h" />
@@ -411,6 +414,7 @@
     <ClInclude Include="src\GameObject\InventoryMenu.h" />
     <ClInclude Include="src\GameObject\Item.h" />
     <ClInclude Include="src\GameObject\Level.h" />
+    <ClInclude Include="src\GameObject\MoneyShop.h" />
     <ClInclude Include="src\GameObject\PauseMenu.h" />
     <ClInclude Include="src\GameObject\Piece.h" />
     <ClInclude Include="src\GameObject\Player.h" />
@@ -436,6 +440,7 @@
     <ClInclude Include="src\GameStates\GSLevel.h" />
     <ClInclude Include="src\GameStates\GSMenu.h" />
     <ClInclude Include="src\GameStates\GSPlay.h" />
+    <ClInclude Include="src\GameStates\GSSetting.h" />
     <ClInclude Include="src\GameStates\GSShop.h" />
     <ClInclude Include="src\nlohmann\adl_serializer.hpp" />
     <ClInclude Include="src\nlohmann\byte_container_with_subtype.hpp" />
