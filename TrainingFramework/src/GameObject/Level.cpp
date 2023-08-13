@@ -5,6 +5,7 @@
 
 Level::Level()
 {
+	printf("%s\n", "Constructor Level");
 	Init();
 }
 
@@ -14,6 +15,7 @@ Level::~Level()
 
 void Level::Init()
 {
+	printf("%s\n", "Init Level");
 	m_numPassedLevel = SaveData::GetInstance()->LoadLevel();
 	auto model = ResourceManagers::GetInstance()->GetModel("Sprite2D.nfg");
 	auto shader = ResourceManagers::GetInstance()->GetShader("TextureShader");
@@ -75,7 +77,6 @@ void Level::Init()
 		ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
 		if(m_pageNum == 1)
 			m_pageNum = 2;
-		printf("%d\n", m_pageNum);
 		});
 	m_changePageBtn.push_back(button);
 	//back
@@ -87,7 +88,6 @@ void Level::Init()
 		ResourceManagers::GetInstance()->PlaySoundWithDuration("smallSelect.wav", 0.1f);
 		if (m_pageNum == 2)
 			m_pageNum = 1;
-		printf("%d\n", m_pageNum);
 		});
 	m_changePageBtn.push_back(button);
 	// text
@@ -119,6 +119,7 @@ void Level::Draw()
 
 void Level::Update(float deltaTime) 
 {
+	//printf("%s %d\n", "listText", m_listText.size());
 	m_numPassedLevel = SaveData::GetInstance()->LoadLevel();
 
 	if (m_pageNum == 1)
@@ -157,28 +158,28 @@ void Level::Update(float deltaTime)
 		{
 			for (int j = 0; j < 3; j++)
 			{
-				int curLevel = i * 3 + j + 1 + 12;
+				int curLevel = i * 3 + j + 13;
 				if (curLevel <= m_numPassedLevel + 1)
 				{
 					auto texture = ResourceManagers::GetInstance()->GetTexture("btn_level.tga");
-					m_listButton[curLevel - 1 - 12]->SetTexture(texture);
-					m_listButton[curLevel - 1 - 12]->SetOnClick([this, curLevel]() {
+					m_listButton[curLevel - 13]->SetTexture(texture);
+					m_listButton[curLevel - 13]->SetOnClick([this, curLevel]() {
 						ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
 						this->SetSelectedLevel(curLevel);
 						});
 
-					m_listText[i * 3 + j]->SetText(std::to_string(curLevel));
+					m_listText[curLevel - 13]->SetText(std::to_string(curLevel));
 					
 				}
 				else
 				{
 					auto texture = ResourceManagers::GetInstance()->GetTexture("btn_level_unclear.tga");
-					m_listButton[curLevel - 1 - 12]->SetTexture(texture);
-					m_listButton[curLevel - 1 - 12]->SetOnClick([]() {
+					m_listButton[curLevel - 13]->SetTexture(texture);
+					m_listButton[curLevel - 13]->SetOnClick([]() {
 
 						});
 
-					m_listText[i * 3 + j]->SetText(std::to_string(curLevel));
+					m_listText[curLevel - 13]->SetText(std::to_string(curLevel));
 				}
 			}
 		}

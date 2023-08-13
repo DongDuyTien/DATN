@@ -92,7 +92,6 @@ void GSLevel::Resume()
 	{
 		ResourceManagers::GetInstance()->PlaySound("woodsTheme.wav", true);
 	}
-	m_level->Init();
 	m_playerManager->GetPlayer()->SetTexture(ResourceManagers::GetInstance()->GetTexture(m_playerManager->GetPlayer()->	GetName() + "_idle.tga"), true);
 	m_playerManager->GetPlayer()->Set2DPosition(Globals::screenWidth / 2.0f - 150.0f, Globals::screenHeight / 2.0f - 50.0f);
 	m_playerManager->GetPlayer()->SetSize(200, 200);

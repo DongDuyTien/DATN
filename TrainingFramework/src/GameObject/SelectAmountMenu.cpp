@@ -3,6 +3,7 @@
 #include "ResourceManagers.h"
 #include "SaveData.h"
 #include "Inventory.h"
+#include "GameSetting.h"
 
 SelectAmountMenu::SelectAmountMenu(int index, bool isEquipment, int coin, Shop* shop) : Sprite2D()
 {
@@ -47,6 +48,7 @@ void SelectAmountMenu::Init(int index, bool isEquipment, int coin, Shop* shop)
 			int cost = item->GetPrice() * item->GetAmount();
 			SaveData::GetInstance()->SaveCoins(coin - cost);
 			Inventory::GetInstance()->AddItemToInventory(item);
+			GameSetting::GetInstance()->SetText("You got " + std::to_string(item->GetAmount()) + " " + item->GetName());
 		}
 		else
 		{
@@ -54,6 +56,7 @@ void SelectAmountMenu::Init(int index, bool isEquipment, int coin, Shop* shop)
 			std::shared_ptr<Equipment> equipment = Shop::GetInstance()->GetEquipmentList()[index];
 			SaveData::GetInstance()->SaveCoins(coin - equipment->GetPrice());
 			Inventory::GetInstance()->AddEquipmentToInventory(equipment);
+			GameSetting::GetInstance()->SetText("You got " + std::to_string(1) + " " + equipment->GetName());
 		}
 		SelectAmountMenu::SetSize(0, 0);
 		shop->SetIsPause(false);

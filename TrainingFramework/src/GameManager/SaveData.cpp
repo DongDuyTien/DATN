@@ -3,6 +3,9 @@
 #include <fstream>
 #include <sstream>
 #include "nlohmann/json.hpp"
+#include "PlayerManager.h"
+#include "Shop.h"
+
 using json = nlohmann::json;
 
 SaveData::SaveData()
@@ -29,6 +32,9 @@ void SaveData::ClearDataFolder()
 	{
 		printf("%s\n", ex.what());
 	}
+	PlayerManager::FreeInstance();
+	Inventory::FreeInstance();
+	Shop::FreeInstance();
 }
 
 bool SaveData::IsNewGame()
@@ -154,7 +160,7 @@ std::vector<std::shared_ptr<Entity>> SaveData::LoadPlayer()
 
 		fclose(fp);
 	}
-
+	printf("%d\n", listPlayer.size());
 	return listPlayer;
 }
 

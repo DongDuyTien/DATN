@@ -46,7 +46,7 @@ private:
 
 	std::vector<std::shared_ptr<GameButton>>m_skillButtonList;
 	std::vector<std::pair<int, int>>	m_click;
-	std::vector<int>				m_pieceList;
+	std::vector<int>					m_pieceList;
 	std::shared_ptr<Entity>				m_player;
 	std::shared_ptr<StatusBar>			m_PStatusBar;
 	std::shared_ptr<StatusBar>			m_EStatusBar;

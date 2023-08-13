@@ -14,8 +14,6 @@ GSShop::~GSShop()
 {
 }
 
-
-
 void GSShop::Init()
 {
 	m_coinToReset = 50;
@@ -175,6 +173,7 @@ void GSShop::HandleTouchEvents(float x, float y, bool bIsPressed)
 
 void GSShop::HandleMouseMoveEvents(float x, float y)
 {
+	m_shop->HandleMouseMoveEvents(x, y);
 }
 
 void GSShop::Update(float deltaTime)

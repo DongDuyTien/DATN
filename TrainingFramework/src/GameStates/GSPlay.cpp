@@ -189,8 +189,6 @@ void GSPlay::HandleKeyEvents(int key, bool bIsPressed)//Insert more case if you 
 //Handle button event
 void GSPlay::HandleTouchEvents(float x, float y, bool bIsPressed)
 {
-
-
 	if (m_isPause)
 	{
 		if(m_isInventoryPressed)

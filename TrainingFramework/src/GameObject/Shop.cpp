@@ -2,6 +2,7 @@
 #include "ResourceManagers.h"
 #include "SaveData.h"
 #include "Inventory.h"
+#include "GameSetting.h"
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
@@ -20,15 +21,17 @@ Shop::~Shop()
 
 void Shop::Init()
 {
+	m_notification = std::make_shared<Notification>();
 	this->CreateItem();
 	auto model = ResourceManagers::GetInstance()->GetModel("Sprite2D.nfg");
 	auto shader = ResourceManagers::GetInstance()->GetShader("TextureShader");
-	auto texture = ResourceManagers::GetInstance()->GetTexture("item1.tga");
-	
+	auto texture = ResourceManagers::GetInstance()->GetTexture("bg_info.tga");
+	m_info = std::make_shared<Sprite2D>(model, shader, texture);
+
 	float pos1 = Globals::screenWidth / 2.0f - 140.0f;
 	float pos2 = Globals::screenHeight / 2.0f - 100.0f;
 	float pos3 = Globals::screenHeight / 2.0f + 110.0f;
-	
+
 	// item
 	for (int i = 0; i < 3; i++)
 	{
@@ -96,14 +99,17 @@ void Shop::Init()
 		button->SetSize(100.0f, 50.0f);
 		button->SetOnClick([this, i]() {
 			int coins = SaveData::GetInstance()->GetCoins();
-			if (coins >= m_listItem[i]->GetPrice() * m_listItem[i]->GetAmount())
+			int amount = m_listItem[i]->GetAmount();
+			if (coins >= m_listItem[i]->GetPrice() * amount)
 			{
 				ResourceManagers::GetInstance()->PlaySoundWithDuration("bigSelect.wav", 0.2f);
 				m_isPause = true;
 				m_menu = std::make_shared<SelectAmountMenu>(i, false, coins, this);
-
 			}
-			else printf("%s\n", "Not enough coin!");
+			else
+			{
+				GameSetting::GetInstance()->SetText("Not enough coin!");
+			}
 			});
 		m_listButton.push_back(button);
 		// buy btn2
@@ -115,8 +121,8 @@ void Shop::Init()
 		{
 			if (Inventory::GetInstance()->HasEquipment(equipment))
 			{
-				button->SetOnClick([]() {
-					printf("%s\n", "Already have");
+				button->SetOnClick([this]() {
+					GameSetting::GetInstance()->SetText("Already have!");
 					});
 			}
 			else
@@ -129,7 +135,10 @@ void Shop::Init()
 						m_isPause = true;
 						m_menu = std::make_shared<SelectAmountMenu>(i, true, coins, this);
 					}
-					else printf("%s\n", "Not enough coin!");
+					else
+					{
+						GameSetting::GetInstance()->SetText("Not enough coin!");
+					}
 					});
 			}
 		}
@@ -217,6 +226,15 @@ void Shop::Draw()
 	{
 		it->Draw();
 	}
+	m_info->Draw();
+	for (auto it : m_infoText)
+	{
+		it->Draw();
+	}
+	if (GameSetting::GetInstance()->GetText() != "")
+	{
+		m_notification->Draw();
+	}
 	if(m_isPause == true)
 		m_menu->Draw();
 }
@@ -260,8 +278,12 @@ void Shop::Update(float deltaTime)
 				m_listEquipment[i]->SetTexture(texture);
 			}
 		}
+		
+		if (m_notification != NULL && GameSetting::GetInstance()->GetText() != "")
+		{
+			m_notification->Update(deltaTime);
+		}
 	}
-	
 }
 
 void Shop::HandleTouchEvents(int x, int y, bool isPressed)
@@ -315,4 +337,120 @@ void Shop::CreateItem()
 		}
 		
 	}
+}
+
+void Shop::HandleMouseMoveEvents(float x, float y)
+{
+	m_info->SetSize(0, 0);
+	m_infoText.clear();
+
+	for (int i = 0; i < 3; i++) 
+	{
+		std::shared_ptr<Item> item = m_listItem[i];
+		if ((item->Get2DPosition().x - item->GetScale().x / 2.0f <= x) && (x <= item->Get2DPosition().x + item->GetScale().x / 2.0f)
+			&& (item->Get2DPosition().y - item->GetScale().y / 2.0f <= y) && (y <= item->Get2DPosition().y + item->GetScale().y / 2.0f))
+		{
+			// The button is being pressed down
+			m_info->SetSize(200, 100);
+			m_info->Set2DPosition(item->Get2DPosition().x + 100, item->Get2DPosition().y - 50);
+			int x = item->Get2DPosition().x + 10;
+			int y = item->Get2DPosition().y - 80;
+			std::vector<std::shared_ptr<Text>> detail = GetItemDetail(i + 1);
+			for (int j = 0; j < detail.size(); j++) {
+				detail[j]->Set2DPosition(x, y + 15 * j);
+				m_infoText.push_back(detail[j]);
+			}
+		}
+	}
+	for (int i = 0; i < 2; i++)
+	{
+		std::shared_ptr<Equipment> equipment = m_listEquipment[i];
+		if ((equipment->Get2DPosition().x - equipment->GetScale().x / 2.0f <= x) && (x <= equipment->Get2DPosition().x + equipment->GetScale().x / 2.0f)
+			&& (equipment->Get2DPosition().y - equipment->GetScale().y / 2.0f <= y) && (y <= equipment->Get2DPosition().y + equipment->GetScale().y / 2.0f))
+		{
+			// The button is being pressed down
+			m_info->SetSize(200, 100);
+			m_info->Set2DPosition(equipment->Get2DPosition().x + 100, equipment->Get2DPosition().y - 50);
+			int x = equipment->Get2DPosition().x + 10;
+			int y = equipment->Get2DPosition().y - 80;
+			std::vector<std::shared_ptr<Text>> detail = GetEquipmentDetail(1, equipment->GetEquipmentType());
+			for (int j = 0; j < detail.size(); j++) {
+				detail[j]->Set2DPosition(x, y + 15 * j);
+				m_infoText.push_back(detail[j]);
+			}
+		}
+	}
+}
+
+std::vector<std::shared_ptr<Text>> Shop::GetItemDetail(int id)
+{
+	std::vector<std::string> itemInfor = SaveData::GetInstance()->GetItemInformation(id);
+	std::vector<std::shared_ptr<Text>> itemDetail;
+	std::string name = itemInfor[0];
+	std::string type = itemInfor[3];
+	std::string hp = itemInfor[1];
+	std::string mp = itemInfor[2];	
+	std::string price = itemInfor[4];
+	std::string description = itemInfor[5];
+
+	auto shader = ResourceManagers::GetInstance()->GetShader("TextShader");
+	auto font = ResourceManagers::GetInstance()->GetFont("Alkatra-VariableFont_wght.ttf");
+	auto text = std::make_shared<Text>(shader, font, "Name: " + name, Vector4(0.95f, 0.f, 0.f, 1.0f), 0.7f);
+	itemDetail.push_back(text);
+	text = std::make_shared<Text>(shader, font, "Type: " + type, TextColor::WHITE, 0.5f);
+	itemDetail.push_back(text);
+	if (id == 1)
+	{
+		text = std::make_shared<Text>(shader, font, "HP: + " + hp, TextColor::WHITE, 0.5f);
+	}
+	else if (id == 2)
+	{
+		text = std::make_shared<Text>(shader, font, "MP: + " + mp, TextColor::WHITE, 0.5f);
+	}
+	else if (id == 3)
+	{
+		text = std::make_shared<Text>(shader, font, "Damage: " + hp, TextColor::WHITE, 0.5f);
+	}
+	itemDetail.push_back(text);
+	text = std::make_shared<Text>(shader, font, "Price: " + price, TextColor::WHITE, 0.5f);
+	itemDetail.push_back(text);
+	text = std::make_shared<Text>(shader, font, "Description: " + description, TextColor::WHITE, 0.5f);
+	itemDetail.push_back(text);
+	
+	return itemDetail;
+}
+
+std::vector<std::shared_ptr<Text>> Shop::GetEquipmentDetail(int id, EquipmentType type)
+{
+	std::vector<std::string> EquipmentInfor = SaveData::GetInstance()->GetEquipmentInformation(id, type);
+	std::vector<std::shared_ptr<Text>> equipmentDetail;
+	std::string name = EquipmentInfor[0];
+	std::string price = EquipmentInfor[2];
+	std::string buff = EquipmentInfor[1];
+	std::string description = EquipmentInfor[3];
+
+	auto shader = ResourceManagers::GetInstance()->GetShader("TextShader");
+	auto font = ResourceManagers::GetInstance()->GetFont("Alkatra-VariableFont_wght.ttf");
+	auto text = std::make_shared<Text>(shader, font, "Name: " + name, Vector4(0.95f, 0.f, 0.f, 1.0f), 0.7f);
+	equipmentDetail.push_back(text);
+	if (type == EquipmentType::SHIELD)
+	{
+		text = std::make_shared<Text>(shader, font, "Type: Shield", TextColor::WHITE, 0.5f);
+		equipmentDetail.push_back(text);
+		text = std::make_shared<Text>(shader, font, "Buff: + " + buff + " def", TextColor::WHITE, 0.5f);
+		equipmentDetail.push_back(text);
+	}
+	else if (type == EquipmentType::WEAPON)
+	{
+		text = std::make_shared<Text>(shader, font, "Type: Weapon", TextColor::WHITE, 0.5f);
+		equipmentDetail.push_back(text);
+		text = std::make_shared<Text>(shader, font, "Buff: + " + buff + " atk", TextColor::WHITE, 0.5f);
+		equipmentDetail.push_back(text);
+	}
+	text = std::make_shared<Text>(shader, font, "Price: " + price, TextColor::WHITE, 0.5f);
+	equipmentDetail.push_back(text);
+	text = std::make_shared<Text>(shader, font, "Description: " + description, TextColor::WHITE, 0.5f);
+	equipmentDetail.push_back(text);
+
+	return equipmentDetail;
 }

@@ -357,6 +357,7 @@
     <ClCompile Include="src\GameObject\Inventory.cpp" />
     <ClCompile Include="src\GameObject\InventoryMenu.cpp" />
     <ClCompile Include="src\GameObject\MoneyShop.cpp" />
+    <ClCompile Include="src\GameObject\Notification.cpp" />
     <ClCompile Include="src\GameObject\SelectAmountMenu.cpp" />
     <ClCompile Include="src\GameObject\Shop.cpp" />
     <ClCompile Include="src\GameObject\UseItemMenu.cpp" />
@@ -415,6 +416,7 @@
     <ClInclude Include="src\GameObject\Item.h" />
     <ClInclude Include="src\GameObject\Level.h" />
     <ClInclude Include="src\GameObject\MoneyShop.h" />
+    <ClInclude Include="src\GameObject\Notification.h" />
     <ClInclude Include="src\GameObject\PauseMenu.h" />
     <ClInclude Include="src\GameObject\Piece.h" />
     <ClInclude Include="src\GameObject\Player.h" />
